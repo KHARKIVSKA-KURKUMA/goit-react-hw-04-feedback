@@ -4,20 +4,7 @@ import FeedbackOptions from 'components/Feedback/Feedback';
 import Statistics from 'components/Statistics/Statistics';
 import Notification from 'components/Notification/Notification';
 import Section from 'components/Section/Section';
-
-function reducer(state, { type, payload }) {
-  switch (type) {
-    case 'good':
-    case 'neutral':
-    case 'bad':
-      return {
-        ...state,
-        [type]: state[type] + payload,
-      };
-    default:
-      return state;
-  }
-}
+import reducer from 'services/reducer';
 
 const App = () => {
   const [state, dispatch] = useReducer(reducer, {
