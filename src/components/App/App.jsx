@@ -1,54 +1,58 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useReducer } from 'react';
 import { Container } from './App.styled';
 import FeedbackOptions from 'components/Feedback/Feedback';
 import Statistics from 'components/Statistics/Statistics';
 import Notification from 'components/Notification/Notification';
 import Section from 'components/Section/Section';
 
+function reducer(state, { type, payload }) {
+  switch (type) {
+    case 'good':
+    case 'neutral':
+    case 'bad':
+      return {
+        ...state,
+        [type]: state[type] + payload,
+      };
+    default:
+      return state;
+  }
+}
+
 const App = () => {
-  /* ---------------------------------- STATE --------------------------------- */
-  const [good, setGood] = useState(0);
-  const [bad, setBad] = useState(0);
-  const [neutral, setNeutral] = useState(0);
-  const [total, setTotal] = useState(0);
-  const [positiveFeedback, setPositiveFeedback] = useState(0);
-  /* -------------------------------------------------------------------------- */
-  const options = {
-    good,
-    neutral,
-    bad,
-  };
-  /* ------------------------------ HANDLE CLICK ------------------------------ */
-  const handleClick = feedback => {
-    switch (feedback) {
-      case 'good':
-        setGood(state => state + 1);
-        return;
-      case 'neutral':
-        setNeutral(state => state + 1);
-        return;
-      case 'bad':
-        setBad(state => state + 1);
-        return;
-      default:
-        return;
-    }
-  };
-
-  /* ---------------------------------- TOTAL --------------------------------- */
-  const countTotalFeedback = () => {
-    setTotal(good + neutral + bad);
-  };
-
-  /* -------------------------------- POSITIVE -------------------------------- */
-  const countPositiveFeedbackPercentage = () =>
-    setPositiveFeedback(Number.parseInt((good / total) * 100));
-  useEffect(() => {
-    countTotalFeedback();
-    countPositiveFeedbackPercentage();
+  const [state, dispatch] = useReducer(reducer, {
+    good: 0,
+    neutral: 0,
+    bad: 0,
   });
+  const { good, neutral, bad } = state;
+
+  const [total, setTotal] = useState(0);
+  const options = {
+    good: 'good',
+    neutral: 'neutral',
+    bad: 'bad',
+  };
+
+  const handleClick = feedback => {
+    dispatch({ type: feedback, payload: 1 });
+    countTotalFeedback();
+  };
+
+  const countTotalFeedback = () => {
+    const totalCount = good + neutral + bad;
+    setTotal(totalCount + 1);
+  };
+
+  const countPositiveFeedbackPercentage = () => {
+    if (total === 0) {
+      return 0;
+    }
+    return Number.parseInt((good / total) * 100);
+  };
 
   /* --------------------------------- RENDER --------------------------------- */
+  const positivePercentage = countPositiveFeedbackPercentage();
   return (
     <Container>
       <Section title="Please leave feedback">
@@ -61,7 +65,7 @@ const App = () => {
             neutral={neutral}
             bad={bad}
             total={total}
-            positivePercentage={positiveFeedback}
+            positivePercentage={positivePercentage}
           />
         ) : (
           <Notification message="There is no feedback" />
